@@ -1,0 +1,83 @@
+INIT
+   Create EMA34
+   Create EMA89
+END-INIT
+
+ONTICK
+   // init local variables
+   init secondsignalold
+   init primesignal  = IDLE
+   init secondsignal = IDLE
+   
+   
+   // Check if new bardata is here (abort if not)
+   IF (barnum = barnumold)
+      RETURN
+   
+   barnumold = barnum   // Update bar number
+   
+   // DO EMA calculations
+   update_EMA34_thistimeframe()
+   update_EMA89_thistimeframe()
+   update_EMA34_highertimeframe()
+   update_bar_highertimeframe()
+   
+   // BUY Part 
+   // check for position count to prevent opening positions beyond defined count
+   if (positions >= maxpositions) {
+      // Check if primary Entry condition (EMA34 crosses EMA89) has happened
+      if( emadiffold > 0 AND 0 > EMA34-EMA89)
+         primesignal = SELL
+      else if ( emadiffold < 0 AND 0 < EMA34-EMA89)
+         primesignal = BUY
+      else
+         BREAK
+   
+      // Check if second Entry condition (EMA34 of next higher timeframe is outside its last barII
+      if (last_bar_highertimeframe_high > EMA34_highertimeframe AND last_bar_highertimeframe_low > EMA34_highertimeframe)
+         secondsignal = BUY
+      else if (last_bar_highertimeframe_high < EMA34_highertimeframe AND last_bar_highertimeframe_low < EMA34_highertimeframe)
+         secondsignal = SELL
+      else 
+         secondsignal = IDLE
+         BREAK
+      
+   (and deactivate current signal wave if limit is exeeded 
+   // to prevent false entry on sudden clos of previous position
+   
+      
+      
+   // check if all entry criteria is met
+   if (primesignal == BUY AND secondsignal == BUY AND secondsignalold != secondsignal)
+      new_position_buy()
+      secondsignalold = secondsignal
+   
+   if (primesignal == SELL AND secondsignal == SELL AND secondsignalold != secondsignal)
+      new_position_sell()
+      secondsignalold = secondsignal
+      BREAK
+   }
+      
+   // Sell Part
+   // Todo: define exit criteria ( in profit, trailing SL etc)
+}
+
+/* Signal:		Durchbruch (Crossover) von 34 durch 89 in beide Richtungen, Einstieg präzise auf Signal hin (!)
+Philosophie: 	Kurze Verweildauer am Markt, da hohe Signalzahl und -trefferquote
+Stoploss:	Orientierung am 89 EMA und festgelegter Abfolge von Kerzen und deren Tiefs (Fibonacci, wer hätte es gedacht)
+		a) risiko reich: direkt unter den 89 EMA
+		b) Tiefster Punkt der letzten 5 / 8 / 13 /21 Kerzen, wenn unterhalb 89, sonst auf 90
+
+Gewinnmitn.:	a) (Teil)schließung nach 0.5* Stoploss - kurze Verweildauer im Markt, aber bescheidenes CRV...
+		
+Ausstieg:	a) Teilschließungen nach Wellen (frühestens nach Nr. 2, tendenziell eher 3)
+		b) Manueller Close nach 0,5 Stopploss, Wiedereinstieg auf letztem High vor Ausstieg, neue SL = Alter SL
+		b) Stop unter 89 EMA - enstpannt, für kleine Positionen ohne Teilschließbbarkeit
+
+Fehlsignalmin.:	Nächst höherer Timeframe: Wenn 34 EMA innerhalb der Kerze ist: Seitwärtsphase - KEIN Signal.
+Achtung:	Swap bei langer Haltedauer beachten!
+
+Eigene Idee:	Nach Teilausstieg SL auf Break-Even. Einwand Peter Seidel: Gute sichere Variante, aber verschenkt u.U viel Potenzial, insbesondere wenn Stopploss nach EMA gesetzt.
+
+Grundphilosophie (unabhängig hiervon): Stoploss soweit wegsetzen, dass Risiko, unnötig ausgestoppt zu werden soweit sinkt damit ich die Chance habe im Plus zu landen! Ein Manueller Ausstieg ist jederzeit von Hand möglich
+*/
