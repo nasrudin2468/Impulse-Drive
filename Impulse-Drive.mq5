@@ -201,23 +201,27 @@ void OnTick()
       pstatus = PCLOSED;
    }
    
+   switch(pstatus){
+   
+      case PCLOSED:{
+         // TODO: Define Buy / Sell Conditions
+         // TODO: Add position open, alter pstatus 
+         ;
+      }   
+   
+      case POPEN:{
+         // TODO: check for minimum profitability in order to switch from stoploss into trailing stop modus
+         // TODO: alter pstatus if ready
+         ;
+      }
       
-   // check if new bar is available and no position opened, otherwise skip part 
-   // for opening new positions
-   if(pstatus == PCLOSED){ 
-      // TODO: Define Buy / Sell Conditions
-      // TODO: Add position open, alter pstatus 
-   }
-   
-   if (pstatus == POPEN){
-      // TODO: check for minimum profitability in order to switch from stoploss into trailing stop modus
-      // TODO: alter pstatus if ready
-   }
-   
-   if (pstatus == PTRAILING){
-      // TODO: Implement trailing algorithm
-      // TODO: Implement Exit strategy
-      // TODO: Implement Tradeclose by magic number   
+      case PTRAILING:{
+         // TODO: Implement trailing algorithm
+         // TODO: Implement Exit strategy
+         // TODO: Implement Tradeclose by magic number   
+         ;
+      }
+      
    }
    // Copy the bar close price for the previous bar prior to the current bar, that is Bar 1
    p_close=mrate[1].close;  // bar 1 close price
