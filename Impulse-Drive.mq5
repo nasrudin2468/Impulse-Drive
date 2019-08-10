@@ -31,7 +31,7 @@ int OnInit()
    // Create Time with an invervall of 60 seconds
    EventSetTimer(60);
    
-   // Get handle for indicators
+   // Get handles for indicators
    emafastHandle=iMA(_Symbol, _Period, EmaFastPeriod, 0, MODE_EMA,PRICE_CLOSE);
    emaslowHandle=iMA(_Symbol, _Period, EmaSlowPeriod, 0, MODE_EMA,PRICE_CLOSE);
  
@@ -154,7 +154,12 @@ void OnTick()
       Alert("Error getting the latest price quote - error:",GetLastError(),"!!");
       return;
    }
-   
+   // Get the details of the latest 3 bars
+   if(CopyRates(_Symbol,_Period,0,3,mrate)<0) {
+      Alert("Error copying rates/history data - error:",GetLastError(),"!!");
+      ResetLastError();
+      return;
+   }
    // Copy new EMA-fast values into buffer 
    if(CopyBuffer(emafastHandle,0,0,3,emafastVal)<0){
       Alert("Error copying EMA fast indicator buffer - error:",GetLastError());
@@ -170,7 +175,7 @@ void OnTick()
    
    // check for open positions
    bool Buy_opened=false;  // variable to hold the result of Buy opened position
-   bool Sell_opened=false; // variables to hold the result of Sell opened position
+   bool Sell_opened=false; // variable to hold the result of Sell opened position
 
    if(PositionSelect(_Symbol)==true) { // we have an opened position
       if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) {
@@ -197,19 +202,14 @@ void OnTick()
 
 
 
-
-
-
-
 //+------------------------------------------------------------------+
 //| Tester function                                                  |
 //|   Callbackfunction Tester (end of a test series)                 |
 //+------------------------------------------------------------------+
 double OnTester()
 {
-//---
    double ret=0.0;
-//---
+   Alert("DEBUG: OnTester() was called");
    return(ret);
 }
 
@@ -218,7 +218,7 @@ double OnTester()
 //+------------------------------------------------------------------+
 void OnTesterInit()
 {
-//---
+   Alert("DEBUG: OnTesterInit() was called");
 }
 
 //+------------------------------------------------------------------+
@@ -226,7 +226,7 @@ void OnTesterInit()
 //+------------------------------------------------------------------+
 void OnTesterPass()
 {
-//---  
+   Alert("DEBUG: OnTesterPass() was called"); 
 }
 
 //+------------------------------------------------------------------+
@@ -234,7 +234,7 @@ void OnTesterPass()
 //+------------------------------------------------------------------+
 void OnTesterDeinit()
 {
-//---  
+   Alert("DEBUG: OnTesterDeinit() was called");
 }
 
 //+------------------------------------------------------------------+
@@ -246,7 +246,7 @@ void OnChartEvent(const int id,
                   const double &dparam,
                   const string &sparam)
 {
-//--- 
+   Alert("DEBUG: OnChartEvent() was called"); 
 }
 
 //+------------------------------------------------------------------+
@@ -255,7 +255,5 @@ void OnChartEvent(const int id,
 //+------------------------------------------------------------------+
 void OnBookEvent(const string &symbol)
 {
-//---  
+   Alert("DEBUG: OnBookEvent() was called");
 }
-
-
