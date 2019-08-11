@@ -218,30 +218,87 @@ void OnTick()
    switch(pstatus){
    
       case PCLOSED:{
-         // TODO: Define Buy / Sell Conditions
-         // TODO: Add position open, alter pstatus 
-         // check for buy condition: ema crossover negative to positive
-         if((emadifference[0] > 0) && (emadifference[1] < 0)) {
-            Alert("Buy condition detected!");
+         // TODO: Modify static SL TP Definitions to match real strategy definition
+         
+         if((emadifference[0] > 0) && (emadifference[1] < 0) && (AllowBuyPositions == true)){
+            Alert("Buy condition detected! Open Buy Request...");
+            
+            // Prepare Data for Buy Position
+            ZeroMemory(mrequest);
+            mrequest.action   = TRADE_ACTION_DEAL;                                        // immediate order execution
+            mrequest.price    = NormalizeDouble(latest_price.ask,_Digits);                // latest ask price
+            mrequest.sl       = NormalizeDouble(latest_price.ask - STP*_Point,_Digits);   // Stop Loss
+            mrequest.tp       = NormalizeDouble(latest_price.ask + TKP*_Point,_Digits);   // Take Profit
+            mrequest.symbol   = _Symbol;                                                  // currency pair
+            mrequest.volume   = Lot;                                                      // number of lots to trade
+            mrequest.magic    = MagicNumber;                                              // Order Magic Number
+            mrequest.type     = ORDER_TYPE_BUY;                                           // Buy Order
+            mrequest.type_filling = ORDER_FILLING_FOK;                                    // Order execution type
+            mrequest.deviation=deviation;                                                 // Deviation from current price
+            
+            // send order
+            int retvalue = OrderSend(mrequest,mresult);
+            // get the result code
+            if((mresult.retcode == TRADE_RETCODE_DONE) 
+             || mresult.retcode == TRADE_RETCODE_PLACED){  //Request is completed or order placed
+               Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
+               pstatus = POPEN;  //alter pstatus from Closed to open
+            }
+            else {
+               Alert("The Buy order request could not be completed -error:",GetLastError());
+               ResetLastError();           
+               return;
+            }
          }
+         
          // check for sell condition: ema crossover positive to negative
-         else if((emadifference[0] < 0) && (emadifference[1] > 0)) {
-            Alert("Sell condition detected!");
+         else if((emadifference[0] < 0) && (emadifference[1] > 0) && (AllowSellPositions == true)) {
+            Alert("Sell condition detected! Open Sell Request...");
+            
+            ZeroMemory(mrequest);
+            mrequest.action   =TRADE_ACTION_DEAL;                                         // immediate order execution
+            mrequest.price    = NormalizeDouble(latest_price.bid,_Digits);                // latest Bid price
+            mrequest.sl       = NormalizeDouble(latest_price.bid + STP*_Point,_Digits);   // Stop Loss
+            mrequest.tp       = NormalizeDouble(latest_price.bid - TKP*_Point,_Digits);   // Take Profit
+            mrequest.symbol   = _Symbol;                                                  // currency pair
+            mrequest.volume   = Lot;                                                      // number of lots to trade
+            mrequest.magic    = MagicNumber;                                              // Order Magic Number
+            mrequest.type     = ORDER_TYPE_SELL;                                          // Sell Order
+            mrequest.type_filling = ORDER_FILLING_FOK;                                    // Order execution type
+            mrequest.deviation=deviation;                                                 // Deviation from current price
+            
+            // send order
+            int retvalue = OrderSend(mrequest,mresult);
+            // get the result code
+            if((mresult.retcode == TRADE_RETCODE_DONE) 
+             || mresult.retcode == TRADE_RETCODE_PLACED){  //Request is completed or order placed
+               Alert("A Sell order has been successfully placed with Ticket#:",mresult.order,"!!");
+               pstatus = POPEN;  //alter pstatus from Closed to open
+            }
+            else {
+               Alert("The Sell order request could not be completed -error:",GetLastError());
+               ResetLastError();           
+               return;
+            }
          }   
       }
+      
       case POPEN:{
          // TODO: check for minimum profitability in order to switch from stoploss into trailing stop modus
          // TODO: alter pstatus if ready
-         ;
+         if (false) {
+            pstatus = PTRAILING;
+         }
       }
       
       case PTRAILING:{
          // TODO: Implement trailing algorithm
          // TODO: Implement Exit strategy
          // TODO: Implement Tradeclose by magic number   
-         ;
-      }
-      
+         if (false) {
+            pstatus = PCLOSED;
+         }
+      }  
    }
    // Copy the bar close price for the previous bar prior to the current bar, that is Bar 1
    p_close=mrate[1].close;  // bar 1 close price
