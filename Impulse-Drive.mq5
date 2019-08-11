@@ -25,9 +25,10 @@ int emafastHandle;                           // handle id of the EmaFast indicat
 int emaslowHandle;                           // handle id of the EmaSlow indicotor
 double emafastVal[], emaslowVal[];           // Dynamic arrays to hold the values of Moving Averages for each bars
 double p_close;                              // Variable to store the close value of a bar
+double emadifference[2];                     // Stores substraction result of both emas over acual and last value. 
 int STP, TKP;                                // To be used for Stop Loss & Take Profit values
 int countbuypositions, countsellpositions;   // order counters
-int pstatus;                              // indicates status of trades
+int pstatus = PUNKNOWN;                      // indicates status of trades
                                              //     0: no position open 
                                              //    10: position opened
                                              //    20: position is in trailing stop modus
@@ -143,8 +144,9 @@ void OnTick()
       return;
    }
    
-   if (IsNewBar == true){
+   if (IsNewBar == false){
    // check if new bar is available, otherwise return
+   // reduces advisor call to once/bar. deactivate if calculation should be done per tick
       return;
    }
    
@@ -184,6 +186,17 @@ void OnTick()
       return;
    }
    
+   // Debug MSG showing latest values
+   //Alert("Closed price: ", mrate[0].close, " ema34: ", emafastVal[0], " ema89: ", emaslowVal[0]);
+   
+   // Per Bar calculations for trading strategy
+   emadifference[1] = emadifference[0];
+   emadifference[0] = emafastVal[0] - emaslowVal[0];
+   
+   if (emadifference[1] == 0){   // Abort until real values are calculated
+      return;
+   }
+   
    // check for open positions
    bool Buy_opened   = false;    // variable to hold the result of Buy opened position
    bool Sell_opened  = false;    // variable to hold the result of Sell opened position
@@ -206,9 +219,15 @@ void OnTick()
       case PCLOSED:{
          // TODO: Define Buy / Sell Conditions
          // TODO: Add position open, alter pstatus 
-         ;
-      }   
-   
+         // check for buy condition: ema crossover negative to positive
+         if((emadifference[0] > 0) && (emadifference[1] < 0)) {
+            Alert("Buy condition detected!");
+         }
+         // check for sell condition: ema crossover positive to negative
+         else if((emadifference[0] < 0) && (emadifference[1] > 0)) {
+            Alert("Sell condition detected!");
+         }   
+      }
       case POPEN:{
          // TODO: check for minimum profitability in order to switch from stoploss into trailing stop modus
          // TODO: alter pstatus if ready
