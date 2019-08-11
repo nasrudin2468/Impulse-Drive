@@ -5,14 +5,16 @@
 //+------------------------------------------------------------------+
 
 // input parameters
-input bool     AllowBuyPositions = false;
-input bool     AllowSellPositions= false;
-input uchar    MaxPositions      = 3;
-input int      MagicNumber       = 2468;
-input int      EmaFastPeriod     = 34;
-input int      EmaSlowPeriod     = 89;
-input int      StopLoss          = 30;
-input int      TakeProfit        = 100;
+input bool     AllowBuyPositions    = true;
+input bool     AllowSellPositions   = true;
+input uchar    MaxPositions         = 3;
+input int      EmaFastPeriod        = 34;
+input int      EmaSlowPeriod        = 89;
+input int      StopLoss             = 30;
+input int      TakeProfit           = 100;      
+input double   Lot                  = 0.1;   // Lots to Trade
+input int      deviation            = 100;
+input int      MagicNumber          = 2468;
 
 // global defines (replace magic numbers)
 #define PCLOSED   0                          // no position open 
@@ -94,19 +96,18 @@ void OnTimer()
 //+------------------------------------------------------------------+
 void OnTrade()
 {
-//---
-   
+   Alert("DEBUG: OnBookTrade() was called");
 }
 
 //+------------------------------------------------------------------+
 //| TradeTransaction function                                        |
-//|   Callback function OrderSend                                    |
+//|   Callback function OrderSendAsync                               |
 //+------------------------------------------------------------------+
 void OnTradeTransaction(const MqlTradeTransaction& trans,
                         const MqlTradeRequest& request,
                         const MqlTradeResult& result)
 {
-//--- 
+   Alert("DEBUG: OnTradeTransaction() was called");
 }
 
 //+------------------------------------------------------------------+
