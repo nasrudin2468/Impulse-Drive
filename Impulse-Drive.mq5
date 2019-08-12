@@ -31,6 +31,7 @@ double p_close;                              // Variable to store the close valu
 double emadifference[2];                     // Stores substraction result of both emas over acual and last value. 
 int STP, TKP;                                // To be used for Stop Loss & Take Profit values
 int countbuypositions, countsellpositions;   // order counters
+double orderprice = 0;                       // confirmed position order price 
 int pstatus = PUNKNOWN;                      // indicates status of trades
                                              //     0: no position open 
                                              //    10: position opened
@@ -241,9 +242,11 @@ void OnTick()
             int retvalue = OrderSend(mrequest,mresult);
             // get the result code
             if((mresult.retcode == TRADE_RETCODE_DONE) 
-             || mresult.retcode == TRADE_RETCODE_PLACED){  //Request is completed or order placed
+             || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
                Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
-               pstatus = POPEN;  //alter pstatus from Closed to open
+               orderprice = mresult.price;                  // Get confirmed orderprice for further calculations
+               Alert("confirmed order price: ",orderprice);
+               pstatus = POPEN;                             //alter pstatus from Closed to open
             }
             else {
                Alert("The Buy order request could not be completed -error:",GetLastError());
@@ -272,35 +275,68 @@ void OnTick()
             int retvalue = OrderSend(mrequest,mresult);
             // get the result code
             if((mresult.retcode == TRADE_RETCODE_DONE) 
-             || mresult.retcode == TRADE_RETCODE_PLACED){  //Request is completed or order placed
-               Alert("A Sell order has been successfully placed with Ticket#:",mresult.order,"!!");
-               pstatus = POPEN;  //alter pstatus from Closed to open
+             || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
+               Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
+               orderprice = mresult.price;                  // Get confirmed orderprice for further calculations
+               Alert("confirmed order price: ",orderprice);
+               pstatus = POPEN;                             //alter pstatus from Closed to open
             }
             else {
                Alert("The Sell order request could not be completed -error:",GetLastError());
                ResetLastError();           
                return;
             }
-         }   
+         }
          break;   
       }
       
       case POPEN:{
          // TODO: check for minimum profitability in order to switch from stoploss into trailing stop modus
          // TODO: alter pstatus if ready
-         if (false) {
-            pstatus = PTRAILING;
+         
+         double price = NormalizeDouble(latest_price.bid,_Digits);
+         double distancemin = 0;
+         if (Buy_opened == true) {
+            distancemin = NormalizeDouble(latest_price.ask + 0.5*STP*_Point,_Digits);
+            if (price > distancemin){
+               // Todo: Alter stoploss to order open price
+               Alert("Todo: Alter stoploss to order open price");
+               
+               pstatus = PTRAILING;
+               Alert("Position is now safe! Switching to trailing mode!");
+            }
          }
+         
+         else if(Sell_opened == true){
+            distancemin = NormalizeDouble(latest_price.ask - 0.5*STP*_Point,_Digits);
+            if (price > distancemin){
+               // Todo: Alter stoploss to order open price
+               Alert("Todo: Alter stoploss to order open price");
+               
+               pstatus = PTRAILING;
+               Alert("Position is now safe! Switching to trailing mode!");
+            }
+         }
+         
+         else {
+            Alert("Fatal Error: Inside STM-POPEN without order opened!");
+         } 
          break;
       }
       
       case PTRAILING:{
          // TODO: Implement trailing algorithm
+         Alert("Todo: Implement trailing algorithm");
          // TODO: Implement Exit strategy
          // TODO: Implement Tradeclose by magic number   
          if (false) {
             pstatus = PCLOSED;
          }
+         break;
+      }
+      
+      case PUNKNOWN: {
+         pstatus = PCLOSED;
          break;
       }  
    }
