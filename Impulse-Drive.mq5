@@ -5,9 +5,10 @@
 //+------------------------------------------------------------------+
 
 // input parameters
-input bool     AllowBuyPositions    = true;
-input bool     AllowSellPositions   = true;
-input uchar    MaxPositions         = 3;
+
+//input bool     AllowBuyPositions    = true;
+//input bool     AllowSellPositions   = true;
+//input uchar    MaxPositions         = 3;
 input int      EmaFastPeriod        = 34;
 input int      EmaSlowPeriod        = 89;
 input int      StopLoss             = 30;
@@ -215,13 +216,13 @@ void OnTick()
       pstatus = PCLOSED;
    }
    
+   
    switch(pstatus){
    
-      case PCLOSED:{
+      case PCLOSED:{    
          // TODO: Modify static SL TP Definitions to match real strategy definition
-         
-         if((emadifference[0] > 0) && (emadifference[1] < 0) && (AllowBuyPositions == true)){
-            Alert("Buy condition detected! Open Buy Request...");
+         if((emadifference[0] > 0) && (emadifference[1] < 0)){
+
             
             // Prepare Data for Buy Position
             ZeroMemory(mrequest);
@@ -252,7 +253,7 @@ void OnTick()
          }
          
          // check for sell condition: ema crossover positive to negative
-         else if((emadifference[0] < 0) && (emadifference[1] > 0) && (AllowSellPositions == true)) {
+         else if((emadifference[0] < 0) && (emadifference[1] > 0)) {
             Alert("Sell condition detected! Open Sell Request...");
             
             ZeroMemory(mrequest);
