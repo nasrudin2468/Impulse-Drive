@@ -282,6 +282,7 @@ void OnTick()
                return;
             }
          }   
+         break;   
       }
       
       case POPEN:{
@@ -290,6 +291,7 @@ void OnTick()
          if (false) {
             pstatus = PTRAILING;
          }
+         break;
       }
       
       case PTRAILING:{
@@ -299,6 +301,7 @@ void OnTick()
          if (false) {
             pstatus = PCLOSED;
          }
+         break;
       }  
    }
    // Copy the bar close price for the previous bar prior to the current bar, that is Bar 1
