@@ -235,6 +235,7 @@ void OnTick()
             
             // Prepare Data for Buy Position
             ZeroMemory(mrequest);
+            ZeroMemory(mresult);
             mrequest.action   = TRADE_ACTION_DEAL;                                        // immediate order execution
             mrequest.price    = NormalizeDouble(latest_price.ask,_Digits);                // latest ask price
             mrequest.sl       = NormalizeDouble(latest_price.ask - STP*_Point,_Digits);   // Stop Loss
@@ -268,6 +269,7 @@ void OnTick()
             Alert("Sell condition detected! Open Sell Request...");
             
             ZeroMemory(mrequest);
+            ZeroMemory(mresult);
             mrequest.action   =TRADE_ACTION_DEAL;                                         // immediate order execution
             mrequest.price    = NormalizeDouble(latest_price.bid,_Digits);                // latest Bid price
             mrequest.sl       = NormalizeDouble(latest_price.bid + STP*_Point,_Digits);   // Stop Loss
