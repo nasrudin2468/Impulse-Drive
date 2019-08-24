@@ -311,37 +311,88 @@ void OnTick()
          double price = NormalizeDouble(latest_price.bid,_Digits);
          double distancemin = 0;
          if (Buy_opened == true) {
-            distancemin = NormalizeDouble(latest_price.ask + 0.5*STP*_Point,_Digits);
+            distancemin = NormalizeDouble(orderprice + TralingSLfactor * STP * _Point, _Digits);
             if (price > distancemin){
                // Todo: Alter stoploss to order open price
-               Alert("Todo: Alter stoploss to order open price");
+               // Alert("Todo: Alter stoploss to order open price");
                
-               pstatus = PTRAILING;
-               Alert("Position is now safe! Switching to trailing mode!");
+               // Prepare Data for SL modification
+               ZeroMemory(mrequest);
+               ZeroMemory(mresult);
+               mrequest.action   = TRADE_ACTION_SLTP;                                        // Change stoploss
+               mrequest.position = positionticket;                                           // ticket number or order
+               mrequest.sl       = NormalizeDouble(orderprice, _Digits);                     // new Stop Loss value: initial buy price
+               mrequest.tp       = ordertakeprofit;                                          // new Take Profit value: old value
+               mrequest.symbol   = _Symbol;                                                  // currency pair
+               mrequest.magic    = MagicNumber;                                              // Order Magic Number
+               
+               Alert("Minimum SL Distance archieved. Trying to break even Stoploss:");
+               Alert("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
+               
+               // send order
+               int retvalue = OrderSend(mrequest,mresult);
+               // get the result code
+               if((mresult.retcode == TRADE_RETCODE_DONE) 
+               || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
+                  pstatus = PTRAILING;
+                  Alert("Position is now safe! Switching to trailing mode!");
+               }
+               else {
+                  Alert("The modify TP SL request could not be completed -error:",GetLastError());
+                  ResetLastError();           
+                  return;
+                  pstatus = PHALT;
+               }
             }
          }
          
          else if(Sell_opened == true){
-            distancemin = NormalizeDouble(latest_price.ask - 0.5*STP*_Point,_Digits);
-            if (price > distancemin){
+            distancemin = NormalizeDouble(orderprice - TralingSLfactor * STP * _Point, _Digits);
+            if (price < distancemin){
                // Todo: Alter stoploss to order open price
-               Alert("Todo: Alter stoploss to order open price");
+               // Alert("Todo: Alter stoploss to order open price");
                
-               pstatus = PTRAILING;
-               Alert("Position is now safe! Switching to trailing mode!");
+               // Prepare Data for SL modification
+               ZeroMemory(mrequest);
+               ZeroMemory(mresult);
+               mrequest.action   = TRADE_ACTION_SLTP;                                        // Change stoploss
+               mrequest.position = positionticket;                                           // ticket number or order
+               mrequest.sl       = NormalizeDouble(orderprice, _Digits);                     // new Stop Loss value: initial buy price
+               mrequest.tp       = ordertakeprofit;                                          // new Take Profit value: old value
+               mrequest.symbol   = _Symbol;                                                  // currency pair
+               mrequest.magic    = MagicNumber;                                              // Order Magic Number
+               
+               Alert("Minimum SL Distance archieved. Trying to break even Stoploss:");
+               Alert("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
+               
+               // send order
+               int retvalue = OrderSend(mrequest,mresult);
+               // get the result code
+               if((mresult.retcode == TRADE_RETCODE_DONE) 
+               || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
+                  pstatus = PTRAILING;
+                  Alert("Position is now safe! Switching to trailing mode!");
+               }
+               else {
+                  Alert("The modify TP SL request could not be completed -error:",GetLastError());
+                  ResetLastError();           
+                  return;
+                  pstatus = PHALT;
+               }
             }
          }
          
          else {
             Alert("Fatal Error: Inside STM-POPEN without order opened!");
+            pstatus = PHALT;
          } 
          break;
       }
       
       case PTRAILING:{
          // TODO: Implement trailing algorithm
-         Alert("Todo: Implement trailing algorithm");
-         // TODO: Implement Exit strategy
+         //Alert("Todo: Implement trailing algorithm");
+         // TODO: Implement Exit strategy (by trailing stop, by slowemacross, by crossover)
          // TODO: Implement Tradeclose by magic number   
          if (false) {
             pstatus = PCLOSED;
