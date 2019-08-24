@@ -253,7 +253,9 @@ void OnTick()
             if((mresult.retcode == TRADE_RETCODE_DONE) 
              || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
                Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
-               orderprice = mresult.price;                  // Get confirmed orderprice for further calculations
+               orderprice        = mresult.price;           // Get confirmed orderprice for further calculations
+               positionticket    = mresult.order;           // Save  order ticket number fur further changes
+               ordertakeprofit   = mrequest.tp;             // Save SL for further position modifications
                Alert("confirmed order price: ",orderprice);
                pstatus = POPEN;                             //alter pstatus from Closed to open
             }
@@ -287,7 +289,9 @@ void OnTick()
             if((mresult.retcode == TRADE_RETCODE_DONE) 
              || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
                Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
-               orderprice = mresult.price;                  // Get confirmed orderprice for further calculations
+               orderprice        = mresult.price;           // Get confirmed orderprice for further calculations
+               positionticket    = mresult.order;           // Save  order ticket number fur further changes
+               ordertakeprofit   = mrequest.tp;             // Save SL for further position modifications
                Alert("confirmed order price: ",orderprice);
                pstatus = POPEN;                             //alter pstatus from Closed to open
             }
