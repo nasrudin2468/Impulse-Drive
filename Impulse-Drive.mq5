@@ -12,7 +12,8 @@
 input int      EmaFastPeriod        = 34;
 input int      EmaSlowPeriod        = 89;
 input int      StopLoss             = 30;
-input int      TakeProfit           = 100;      
+input int      TakeProfit           = 100;
+input double   TralingSLfactor      = 0.5;      
 input double   Lot                  = 0.1;   // Lots to Trade
 input int      deviation            = 100;
 input int      MagicNumber          = 2468;
@@ -32,12 +33,16 @@ double p_close;                              // Variable to store the close valu
 double emadifference[2];                     // Stores substraction result of both emas over acual and last value. 
 int STP, TKP;                                // To be used for Stop Loss & Take Profit values
 int countbuypositions, countsellpositions;   // order counters
-double orderprice = 0;                       // confirmed position order price 
+double orderprice       = 0;                 // confirmed position order price
+double positionticket   = 0;                 // ticket number of position
+double ordertakeprofit  = 0;                 // tp value from open order, needs to be given on sl changes
 int pstatus = PUNKNOWN;                      // indicates status of trades
                                              //     0: no position open 
                                              //    10: position opened
                                              //    20: position is in trailing stop modus
                                              //    90: unknown status, possible malfunction
+bool debughalt = false;   
+                                          
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -99,7 +104,7 @@ void OnTimer()
 //+------------------------------------------------------------------+
 void OnTrade()
 {
-   Alert("DEBUG: OnBookTrade() was called");
+   //Alert("DEBUG: OnBookTrade() was called");
 }
 
 //+------------------------------------------------------------------+
@@ -110,7 +115,7 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
                         const MqlTradeRequest& request,
                         const MqlTradeResult& result)
 {
-   Alert("DEBUG: OnTradeTransaction() was called");
+   //Alert("DEBUG: OnTradeTransaction() was called");
 }
 
 //+------------------------------------------------------------------+
@@ -119,6 +124,8 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
 //+------------------------------------------------------------------+
 void OnTick()
 {
+   if (debughalt == true){ return;}
+   
    static datetime Old_Time;
    datetime New_Time[1];
    bool IsNewBar = false;
