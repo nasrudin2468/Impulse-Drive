@@ -22,6 +22,7 @@ input int      MagicNumber          = 2468;
 #define POPEN     10                         // position opened
 #define PTRAILING 20                         // position is in trailing stop modus
 #define PUNKNOWN  90                         // unknown status, possible malfunction
+#define PHALT     100                        // Force-stop EA state machine from further changes - debugging only
 
 // global declarations
 int emafastHandle;                           // handle id of the EmaFast indicator
@@ -338,7 +339,12 @@ void OnTick()
       case PUNKNOWN: {
          pstatus = PCLOSED;
          break;
-      }  
+      }
+      
+      case PHALT: {
+         Alert("DEBUG: EA state maschine was halted.");
+         break;
+      }    
    }
    // Copy the bar close price for the previous bar prior to the current bar, that is Bar 1
    p_close=mrate[1].close;  // bar 1 close price
