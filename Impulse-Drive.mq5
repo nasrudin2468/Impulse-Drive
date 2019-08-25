@@ -11,6 +11,11 @@ input int      StopLoss             = 30;    // absolut stop loss difference (pi
 input int      TakeProfit           = 100;   // absolut take profit difference (pip value, might be scaled dependent on post comma letter count)
 input double   TrailingSLfactor     = 0.5;   // relative factor of Buyprice - SL price over trigger price - buyprice for switching into 
                                              // trailing SL mode 
+input int      ExitByTSL            = 1;     // exit strategy by trailing stop loss (0: OFF | 1: on | 2: on TICKWISE)
+input int      ExitByCrossover      = 1;     // exit strategy by ema crossover (0: OFF | 1: on | 2: on TICKWISE)
+input int      ExitBySlowEmaCross   = 1;     // exit strategy by candle crossing the slowEma (0: OFF | 1: on | 2: on TICKWISE)
+input int      ExitByFastEmaCross   = 0;     // exit strategy by canlde crossing the slowEma (0: OFF | 1: on | 2: on TICKWISE)
+input double   TSLRelativeGain      = 0.5;   // Trailing stop relative profit value based on highest profit since order start
 input double   Lot                  = 0.1;   // static lotsize to Trade
 input int      deviation            = 100;   // maximum allowed price difference of actual price over requested price for placing an order
 input int      MagicNumber          = 2468;  // additional identification number added to each order opened by the expert advisor
@@ -388,13 +393,31 @@ void OnTick()
       }
       
       case PTRAILING:{
-         // TODO: Implement trailing algorithm
-         //Alert("Todo: Implement trailing algorithm");
-         // TODO: Implement Exit strategy (by trailing stop, by slowemacross, by crossover)
-         // TODO: Implement Tradeclose by magic number   
-         if (false) {
-            pstatus = PCLOSED;
+         // TODO: Implement Tradeclose by magic number 
+         if (ExitByTSL > 0) {
+            if ((ExitByTSL == 2) || (IsNewBar == true)) {
+               // TODO: Implement Exit strategy by trailing stop
+            } 
          }
+         
+         if (ExitBySlowEmaCross > 0) {
+            if ((ExitBySlowEmaCross == 2) || (IsNewBar == true)) {
+               // TODO: Implement Exit strategy by slowemacross
+            }
+         }
+         
+         if (ExitByFastEmaCross > 0) {
+            if ((ExitByFastEmaCross == 2) || (IsNewBar == true)) {
+               // TODO: Implement Exit strategy by fastemacross
+            }
+         }
+         
+         if (ExitByCrossover > 0) {
+            if ((ExitByCrossover == 2) || (IsNewBar == true)) {
+               // TODO: Implement Exit strategy by crossover
+            }
+         }
+
          break;
       }
       
