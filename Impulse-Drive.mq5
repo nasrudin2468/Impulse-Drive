@@ -34,12 +34,13 @@ double   emafastVal[], emaslowVal[];         // Dynamic arrays to hold the value
 double   p_close;                            // Variable to store the close value of a bar
 double   emadifference[2];                   // Stores substraction result of both emas over acual and last value. 
 int      STP, TKP;                           // To be used for Stop Loss & Take Profit values
-int      countbuypositions; 
+int      countbuypositions;
 int      countsellpositions;                 // order counters
-double   orderprice       = 0;               // confirmed position order price
+double   orderprice        = 0;              // confirmed position order price
+double   tslprice          = 0;              // calculated trailing stop price level
 ulong    positionticket    = 0;              // ticket number of position
-double   ordertakeprofit  = 0;               // tp value from open order, needs to be given on sl changes
-int      pstatus = PUNKNOWN;                 // indicates status of trades
+double   ordertakeprofit   = 0;              // tp value from open order, needs to be given on sl changes
+int      pstatus           = PUNKNOWN;       // indicates status of trades
                                              //     0: no position open 
                                              //    10: position opened
                                              //    20: position is in trailing stop modus
@@ -308,8 +309,7 @@ void OnTick()
       }
       
       case POPEN:{
-         // TODO: check for minimum profitability in order to switch from stoploss into trailing stop modus
-         // TODO: alter pstatus if ready
+
          
          double price = NormalizeDouble(latest_price.bid,_Digits);
          double distancemin = 0;
