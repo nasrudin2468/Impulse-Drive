@@ -234,6 +234,7 @@ void OnTick()
    
       case PCLOSED:{    
          // TODO: Modify static SL TP Definitions to match real strategy definition
+         // TODO: SL on EMA89 like original Seidel strategy
          if((emadifference[0] > 0) && (emadifference[1] < 0)){
 
             
@@ -393,31 +394,125 @@ void OnTick()
       }
       
       case PTRAILING:{
-         // TODO: Implement Tradeclose by magic number 
-         if (ExitByTSL > 0) {
-            if ((ExitByTSL == 2) || (IsNewBar == true)) {
-               Print("// TODO: Implement Exit strategy by trailing stop");
+         double price   = NormalizeDouble(latest_price.bid,_Digits);    // Get latest price for further calculations
+         bool doexit    = false;                                        // control variable for exit process
+
+         if(ExitByTSL > 0){
+            if((ExitByTSL == 2) || (IsNewBar == true)){
+               // TODO: Implement Exit strategy by trailing stop
+               if(Buy_opened == true){
+
+                  // calculate actual tsl price level based on TSL Relative gain 
+                  double tsldifference = price - orderprice;
+                  double newtslprice   = orderprice + (tsldifference * TSLRelativeGain);
+                  
+                  // replace tsl price value if larger than old value
+                  if(newtslprice > tslprice){
+                     tslprice = newtslprice;
+                  }
+
+                  // check if price is lower than tsl
+                  if(price < tslprice){
+                     doexit = true;
+                     Print("Exit by TSL (BUY) condition triggeded!");
+                  }
+               }
+               
+               else if(Sell_opened == true){
+                  // calculate actual tsl price level based on TSL Relative gain 
+                  double tsldifference = orderprice - price;
+                  double newtslprice   = orderprice - (tsldifference * TSLRelativeGain);
+                  
+                  // replace tsl price value if larger than old value
+                  if(newtslprice < tslprice){
+                     tslprice = newtslprice;
+                  }
+
+                  // check if price is lower than tsl
+                  if(price > tslprice){
+                     doexit = true;
+                     Print("Exit by TSL (SELL) condition triggeded!");
+                  }
+               }
+            }
+         }
+ 
+         if(ExitBySlowEmaCross>0){
+            if((ExitBySlowEmaCross == 2) || (IsNewBar == true)){
+               if((( Buy_opened == true) && (price < emaslowVal[0]))
+                  || (( Sell_opened == true) && (price > emaslowVal[0]))){
+                     doexit = true;
+                     Print("Exit by SlowEmaCross condition triggeded!");
+                  }
+               }
             } 
-         }
-         
-         if (ExitBySlowEmaCross > 0) {
-            if ((ExitBySlowEmaCross == 2) || (IsNewBar == true)) {
-               Print("// TODO: Implement Exit strategy by slowemacross");
+         if(ExitByFastEmaCross>0) {
+            if((ExitByFastEmaCross == 2) || (IsNewBar == true)){
+               if((( Buy_opened == true) && (price < emafastVal[0]))
+               || (( Sell_opened == true) && (price> emafastVal[0]))){
+                  doexit = true;
+                  Print("Exit by FastEmaCross condition triggeded!");
+                  }
+               }
             }
-         }
-         
-         if (ExitByFastEmaCross > 0) {
-            if ((ExitByFastEmaCross == 2) || (IsNewBar == true)) {
-               Print("// TODO: Implement Exit strategy by fastemacross");
-            }
-         }
-         
-         if (ExitByCrossover > 0) {
-            if ((ExitByCrossover == 2) || (IsNewBar == true)) {
-               Print("// TODO: Implement Exit strategy by crossover");
+
+         if(ExitByCrossover>0){
+            if((ExitByCrossover == 2) || (IsNewBar == true)){
+               // TODO: Implement Exit strategy by crossover
+               if(((emadifference[0] > 0) && (emadifference[1] < 0))
+               || ((emadifference[0] < 0) && (emadifference[1] > 0))){
+                  doexit = true;
+                  Print("Exit by EMA Crossover condition triggeded!");
+               }
             }
          }
 
+         // check if close condition happend and trigger positio close
+         if(doexit == true){
+            // Todo: Implement instant position close. On sucess:change State!
+            // Prepare Data for Buy Position
+            ZeroMemory(mrequest);
+            ZeroMemory(mresult);
+            mrequest.action   = TRADE_ACTION_DEAL;                                        // immediate order execution
+            mrequest.position = positionticket;
+            mrequest.symbol   = _Symbol;                                                  // currency pair
+            mrequest.volume   = Lot;                                                      // number of lots to trade
+            mrequest.magic    = MagicNumber;                                              // Order Magic Number
+            mrequest.deviation=deviation;                                                 // Deviation from current price
+            if(Buy_opened == true) {
+               mrequest.price=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+               mrequest.type =ORDER_TYPE_SELL;
+            }
+            else if (Sell_opened == true){
+               mrequest.price=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+               mrequest.type =ORDER_TYPE_BUY;
+            }
+            else {
+               Alert("Fatal Error! Tried to close position of unknown type (buy / sell");
+               pstatus = PUNKNOWN;
+            }
+            
+            // send order
+            int retvalue = OrderSend(mrequest,mresult);
+            // get the result code
+            if((mresult.retcode == TRADE_RETCODE_DONE) 
+             || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
+               Print("Position with Ticket#:",mresult.order, "closed successfully!");
+               
+               // Reset global order data
+               orderprice        = 0;          
+               positionticket    = 0;
+               ordertakeprofit   = 0;
+               Print("confirmed order price: ",mresult.price);
+               pstatus = PCLOSED;                           //alter pstatus from Closed to open
+            }
+            else {
+               Alert("The close order request could not be completed -error:",GetLastError());
+               ResetLastError();           
+               return;
+            }
+         }
+         
          break;
       }
       
