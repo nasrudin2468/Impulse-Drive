@@ -31,7 +31,7 @@ double emadifference[2];                     // Stores substraction result of bo
 int STP, TKP;                                // To be used for Stop Loss & Take Profit values
 int countbuypositions, countsellpositions;   // order counters
 double orderprice       = 0;                 // confirmed position order price
-double positionticket   = 0;                 // ticket number of position
+ulong positionticket    = 0;                 // ticket number of position
 double ordertakeprofit  = 0;                 // tp value from open order, needs to be given on sl changes
 int pstatus = PUNKNOWN;                      // indicates status of trades
                                              //     0: no position open 
