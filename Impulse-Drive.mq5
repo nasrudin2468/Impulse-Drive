@@ -9,7 +9,7 @@ input int      EmaFastPeriod        = 34;    // value count of fast exponential 
 input int      EmaSlowPeriod        = 89;    // value count of slow exponential average, used for cross over signal
 input int      StopLoss             = 30;    // absolut stop loss difference (pip value, might be scaled dependent on post comma letter count) 
 input int      TakeProfit           = 100;   // absolut take profit difference (pip value, might be scaled dependent on post comma letter count)
-input double   TralingSLfactor      = 0.5;   // relative factor of Buyprice - SL price over trigger price - buyprice for switching into 
+input double   TrailingSLfactor     = 0.5;   // relative factor of Buyprice - SL price over trigger price - buyprice for switching into 
                                              // trailing SL mode 
 input double   Lot                  = 0.1;   // static lotsize to Trade
 input int      deviation            = 100;   // maximum allowed price difference of actual price over requested price for placing an order
@@ -308,7 +308,7 @@ void OnTick()
          double price = NormalizeDouble(latest_price.bid,_Digits);
          double distancemin = 0;
          if (Buy_opened == true) {
-            distancemin = NormalizeDouble(orderprice + TralingSLfactor * STP * _Point, _Digits);
+            distancemin = NormalizeDouble(orderprice + TrailingSLfactor * STP * _Point, _Digits);
             if (price > distancemin){
                // Todo: Alter stoploss to order open price
                // Alert("Todo: Alter stoploss to order open price");
@@ -344,7 +344,7 @@ void OnTick()
          }
          
          else if(Sell_opened == true){
-            distancemin = NormalizeDouble(orderprice - TralingSLfactor * STP * _Point, _Digits);
+            distancemin = NormalizeDouble(orderprice - TrailingSLfactor * STP * _Point, _Digits);
             if (price < distancemin){
                // Todo: Alter stoploss to order open price
                // Alert("Todo: Alter stoploss to order open price");
