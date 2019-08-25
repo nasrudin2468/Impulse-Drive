@@ -140,7 +140,7 @@ void OnTick()
          IsNewBar = true;              // if it isn't a first call, the new bar has appeared
          
          if(MQL5InfoInteger(MQL5_DEBUGGING)) {
-            Print("We have new bar here ", New_Time[0]," old time was ", Old_Time);
+            //Print("We have new bar here ", New_Time[0]," old time was ", Old_Time);
          }
          Old_Time=New_Time[0];            // saving bar time
       }
@@ -255,11 +255,11 @@ void OnTick()
             // get the result code
             if((mresult.retcode == TRADE_RETCODE_DONE) 
              || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
-               Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
+               Print("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
                orderprice        = mresult.price;           // Get confirmed orderprice for further calculations
                positionticket    = mresult.order;           // Save  order ticket number fur further changes
                ordertakeprofit   = mrequest.tp;             // Save SL for further position modifications
-               Alert("confirmed order price: ",orderprice);
+               Print("confirmed order price: ",orderprice);
                pstatus = POPEN;                             //alter pstatus from Closed to open
             }
             else {
@@ -271,7 +271,7 @@ void OnTick()
          
          // check for sell condition: ema crossover positive to negative
          else if((emadifference[0] < 0) && (emadifference[1] > 0)) {
-            Alert("Sell condition detected! Open Sell Request...");
+            Print("Sell condition detected! Open Sell Request...");
             
             ZeroMemory(mrequest);
             ZeroMemory(mresult);
@@ -291,11 +291,11 @@ void OnTick()
             // get the result code
             if((mresult.retcode == TRADE_RETCODE_DONE) 
              || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
-               Alert("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
+               Print("A Buy order has been successfully placed with Ticket#:",mresult.order,"!!");
                orderprice        = mresult.price;           // Get confirmed orderprice for further calculations
                positionticket    = mresult.order;           // Save  order ticket number fur further changes
                ordertakeprofit   = mrequest.tp;             // Save SL for further position modifications
-               Alert("confirmed order price: ",orderprice);
+               Print("confirmed order price: ",orderprice);
                pstatus = POPEN;                             //alter pstatus from Closed to open
             }
             else {
@@ -317,7 +317,7 @@ void OnTick()
             distancemin = NormalizeDouble(orderprice + TrailingSLfactor * STP * _Point, _Digits);
             if (price > distancemin){
                // Todo: Alter stoploss to order open price
-               // Alert("Todo: Alter stoploss to order open price");
+               // Print("Todo: Alter stoploss to order open price");
                
                // Prepare Data for SL modification
                ZeroMemory(mrequest);
@@ -329,8 +329,8 @@ void OnTick()
                mrequest.symbol   = _Symbol;                                                  // currency pair
                mrequest.magic    = MagicNumber;                                              // Order Magic Number
                
-               Alert("Minimum SL Distance archieved. Trying to break even Stoploss:");
-               Alert("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
+               Print("Minimum SL Distance archieved. Trying to break even Stoploss:");
+               Print("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
                
                // send order
                int retvalue = OrderSend(mrequest,mresult);
@@ -338,7 +338,7 @@ void OnTick()
                if((mresult.retcode == TRADE_RETCODE_DONE) 
                || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
                   pstatus = PTRAILING;
-                  Alert("Position is now safe! Switching to trailing mode!");
+                  Print("Position is now safe! Switching to trailing mode!");
                }
                else {
                   Alert("The modify TP SL request could not be completed -error:",GetLastError());
@@ -353,7 +353,7 @@ void OnTick()
             distancemin = NormalizeDouble(orderprice - TrailingSLfactor * STP * _Point, _Digits);
             if (price < distancemin){
                // Todo: Alter stoploss to order open price
-               // Alert("Todo: Alter stoploss to order open price");
+               // Print("Todo: Alter stoploss to order open price");
                
                // Prepare Data for SL modification
                ZeroMemory(mrequest);
@@ -365,8 +365,8 @@ void OnTick()
                mrequest.symbol   = _Symbol;                                                  // currency pair
                mrequest.magic    = MagicNumber;                                              // Order Magic Number
                
-               Alert("Minimum SL Distance archieved. Trying to break even Stoploss:");
-               Alert("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
+               Print("Minimum SL Distance archieved. Trying to break even Stoploss:");
+               Print("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
                
                // send order
                int retvalue = OrderSend(mrequest,mresult);
@@ -374,7 +374,7 @@ void OnTick()
                if((mresult.retcode == TRADE_RETCODE_DONE) 
                || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
                   pstatus = PTRAILING;
-                  Alert("Position is now safe! Switching to trailing mode!");
+                  Print("Position is now safe! Switching to trailing mode!");
                }
                else {
                   Alert("The modify TP SL request could not be completed -error:",GetLastError());
@@ -396,25 +396,25 @@ void OnTick()
          // TODO: Implement Tradeclose by magic number 
          if (ExitByTSL > 0) {
             if ((ExitByTSL == 2) || (IsNewBar == true)) {
-               // TODO: Implement Exit strategy by trailing stop
+               Print("// TODO: Implement Exit strategy by trailing stop");
             } 
          }
          
          if (ExitBySlowEmaCross > 0) {
             if ((ExitBySlowEmaCross == 2) || (IsNewBar == true)) {
-               // TODO: Implement Exit strategy by slowemacross
+               Print("// TODO: Implement Exit strategy by slowemacross");
             }
          }
          
          if (ExitByFastEmaCross > 0) {
             if ((ExitByFastEmaCross == 2) || (IsNewBar == true)) {
-               // TODO: Implement Exit strategy by fastemacross
+               Print("// TODO: Implement Exit strategy by fastemacross");
             }
          }
          
          if (ExitByCrossover > 0) {
             if ((ExitByCrossover == 2) || (IsNewBar == true)) {
-               // TODO: Implement Exit strategy by crossover
+               Print("// TODO: Implement Exit strategy by crossover");
             }
          }
 
@@ -427,14 +427,12 @@ void OnTick()
       }
       
       case PHALT: {
-         Alert("DEBUG: EA state maschine was halted.");
+         Print("DEBUG: EA state maschine was halted.");
          break;
       }    
    }
    // Copy the bar close price for the previous bar prior to the current bar, that is Bar 1
    p_close=mrate[1].close;  // bar 1 close price
-
-   
 }
 
 
