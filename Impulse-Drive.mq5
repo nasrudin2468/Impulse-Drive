@@ -23,17 +23,18 @@ input int      MagicNumber          = 2468;  // additional identification number
 #define PHALT     100                        // Force-stop EA state machine from further changes - debugging only
 
 // global declarations
-int emafastHandle;                           // handle id of the EmaFast indicator
-int emaslowHandle;                           // handle id of the EmaSlow indicotor
-double emafastVal[], emaslowVal[];           // Dynamic arrays to hold the values of Moving Averages for each bars
-double p_close;                              // Variable to store the close value of a bar
-double emadifference[2];                     // Stores substraction result of both emas over acual and last value. 
-int STP, TKP;                                // To be used for Stop Loss & Take Profit values
-int countbuypositions, countsellpositions;   // order counters
-double orderprice       = 0;                 // confirmed position order price
-ulong positionticket    = 0;                 // ticket number of position
-double ordertakeprofit  = 0;                 // tp value from open order, needs to be given on sl changes
-int pstatus = PUNKNOWN;                      // indicates status of trades
+int      emafastHandle;                      // handle id of the EmaFast indicator
+int      emaslowHandle;                      // handle id of the EmaSlow indicotor
+double   emafastVal[], emaslowVal[];         // Dynamic arrays to hold the values of Moving Averages for each bars
+double   p_close;                            // Variable to store the close value of a bar
+double   emadifference[2];                   // Stores substraction result of both emas over acual and last value. 
+int      STP, TKP;                           // To be used for Stop Loss & Take Profit values
+int      countbuypositions; 
+int      countsellpositions;                 // order counters
+double   orderprice       = 0;               // confirmed position order price
+ulong    positionticket    = 0;              // ticket number of position
+double   ordertakeprofit  = 0;               // tp value from open order, needs to be given on sl changes
+int      pstatus = PUNKNOWN;                 // indicates status of trades
                                              //     0: no position open 
                                              //    10: position opened
                                              //    20: position is in trailing stop modus
