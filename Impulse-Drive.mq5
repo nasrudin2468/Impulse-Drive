@@ -273,7 +273,8 @@ void OnTick()
             mrequest.tp       = NormalizeDouble(latest_price.ask + TKP*_Point,_Digits);   // Take Profit
             ZeroMemory(mresult);
             
-            tdi_OpenPosition(mrequest, mresult);
+            // open buy position
+            tdi_setPosition(mrequest, mresult);
          }
          
          // check for sell condition: ema crossover positive to negative
@@ -287,7 +288,8 @@ void OnTick()
             mrequest.tp       = NormalizeDouble(latest_price.bid - TKP*_Point,_Digits);   // Take Profit 
             ZeroMemory(mresult);
             
-            tdi_OpenPosition(mrequest, mresult);
+            // open sell  position
+            tdi_setPosition(mrequest, mresult);
          }
          break;   
       }
@@ -297,39 +299,24 @@ void OnTick()
          
          double price = NormalizeDouble(latest_price.bid,_Digits);
          double distancemin = 0;
+         
          if (Buy_opened == true) {
             distancemin = NormalizeDouble(orderprice + TrailingSLfactor * STP * _Point, _Digits);
             if (price > distancemin){
                // Todo: Alter stoploss to order open price
                // Print("Todo: Alter stoploss to order open price");
-               
-               // Prepare Data for SL modification
-               ZeroMemory(mrequest);
-               ZeroMemory(mresult);
-               mrequest.action   = TRADE_ACTION_SLTP;                                        // Change stoploss
-               mrequest.position = positionticket;                                           // ticket number or order
-               mrequest.sl       = NormalizeDouble(orderprice, _Digits);                     // new Stop Loss value: initial buy price
-               mrequest.tp       = ordertakeprofit;                                          // new Take Profit value: old value
-               mrequest.symbol   = _Symbol;                                                  // currency pair
-               mrequest.magic    = MagicNumber;                                              // Order Magic Number
-               
                Print("Minimum SL Distance archieved. Trying to break even Stoploss:");
                Print("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
                
+               // Prepare Data for SL modification
+               initTradeRequest(mrequest);
+               mrequest.position = positionticket;                                           // ticket number or order
+               mrequest.sl       = NormalizeDouble(orderprice, _Digits);                     // new Stop Loss value: initial buy price
+               mrequest.tp       = ordertakeprofit;                                          // new Take Profit value: old value
+               ZeroMemory(mresult);
+               
                // send order
-               int retvalue = OrderSend(mrequest,mresult);
-               // get the result code
-               if((mresult.retcode == TRADE_RETCODE_DONE) 
-               || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
-                  pstatus = PTRAILING;
-                  Print("Position is now safe! Switching to trailing mode!");
-               }
-               else {
-                  Alert("The modify TP SL request could not be completed -error:",GetLastError());
-                  ResetLastError();           
-                  return;
-                  pstatus = PHALT;
-               }
+               tdi_ModifyTPSL(mrequest, mresult);
             }
          }
          
@@ -338,34 +325,18 @@ void OnTick()
             if (price < distancemin){
                // Todo: Alter stoploss to order open price
                // Print("Todo: Alter stoploss to order open price");
+               Print("Minimum SL Distance archieved. Trying to break even Stoploss:");
+               Print("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: SELL");
                
                // Prepare Data for SL modification
-               ZeroMemory(mrequest);
-               ZeroMemory(mresult);
-               mrequest.action   = TRADE_ACTION_SLTP;                                        // Change stoploss
+               initTradeRequest(mrequest);
                mrequest.position = positionticket;                                           // ticket number or order
                mrequest.sl       = NormalizeDouble(orderprice, _Digits);                     // new Stop Loss value: initial buy price
                mrequest.tp       = ordertakeprofit;                                          // new Take Profit value: old value
-               mrequest.symbol   = _Symbol;                                                  // currency pair
-               mrequest.magic    = MagicNumber;                                              // Order Magic Number
+               ZeroMemory(mresult);
                
-               Print("Minimum SL Distance archieved. Trying to break even Stoploss:");
-               Print("Position: ", positionticket, " Symbol: ", mrequest.symbol, " Type: BUY");
-               
-               // send order
-               int retvalue = OrderSend(mrequest,mresult);
-               // get the result code
-               if((mresult.retcode == TRADE_RETCODE_DONE) 
-               || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
-                  pstatus = PTRAILING;
-                  Print("Position is now safe! Switching to trailing mode!");
-               }
-               else {
-                  Alert("The modify TP SL request could not be completed -error:",GetLastError());
-                  ResetLastError();           
-                  return;
-                  pstatus = PHALT;
-               }
+              // send order
+               tdi_ModifyTPSL(mrequest, mresult);
             }
          }
          
@@ -397,7 +368,7 @@ void OnTick()
                   // check if price is lower than tsl
                   if(price < tslprice){
                      doexit = true;
-                     Print("Exit by TSL (BUY) condition triggeded!");
+                     Print("Exit by TSL (BUY) condition triggered!");
                   }
                }
                
@@ -453,49 +424,28 @@ void OnTick()
          // check if close condition happend and trigger positio close
          if(doexit == true){
             // Todo: Implement instant position close. On sucess:change State!
-            // Prepare Data for Buy Position
-            ZeroMemory(mrequest);
-            ZeroMemory(mresult);
-            mrequest.action   = TRADE_ACTION_DEAL;                                        // immediate order execution
-            mrequest.position = positionticket;
-            mrequest.symbol   = _Symbol;                                                  // currency pair
-            mrequest.volume   = Lot;                                                      // number of lots to trade
-            mrequest.magic    = MagicNumber;                                              // Order Magic Number
-            mrequest.deviation=deviation;                                                 // Deviation from current price
-            if(Buy_opened == true) {
+           
+            // Prepare Data for position close
+            initTradeRequest(mrequest);
+            
+            if(Buy_opened == true) {         // close buy position by selling it
                mrequest.price=SymbolInfoDouble(_Symbol,SYMBOL_BID);
                mrequest.type =ORDER_TYPE_SELL;
             }
-            else if (Sell_opened == true){
+            else if (Sell_opened == true){   //close sell position by buying it
                mrequest.price=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
                mrequest.type =ORDER_TYPE_BUY;
             }
             else {
                Alert("Fatal Error! Tried to close position of unknown type (buy / sell");
                pstatus = PUNKNOWN;
-            }
-            
-            // send order
-            int retvalue = OrderSend(mrequest,mresult);
-            // get the result code
-            if((mresult.retcode == TRADE_RETCODE_DONE) 
-             || mresult.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
-               Print("Position with Ticket#:",mresult.order, "closed successfully!");
-               
-               // Reset global order data
-               orderprice        = 0;          
-               positionticket    = 0;
-               ordertakeprofit   = 0;
-               Print("confirmed order price: ",mresult.price);
-               pstatus = PCLOSED;                           //alter pstatus from Closed to open
-            }
-            else {
-               Alert("The close order request could not be completed -error:",GetLastError());
-               ResetLastError();           
                return;
             }
+            ZeroMemory(mresult);
+            
+            // send order
+            tdi_setPosition(mrequest, mresult);
          }
-         
          break;
       }
       

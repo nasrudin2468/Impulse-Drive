@@ -17,10 +17,11 @@
 
 
 //################################################################################
-//# Opens a SL secured instant position with given parameters                    #
+//# Opens / closes a SL secured instant position with given parameters           #
+//#  Closing a position is done by an inverted tradeaction on a given trade-id   #
 //#                                                                              #
 //################################################################################
-int tdi_OpenPosition(MqlTradeRequest &request, MqlTradeResult &result)
+int tdi_setPosition(MqlTradeRequest &request, MqlTradeResult &result)
 {
    // Prepare Data for Buy Position
    request.action   = TRADE_ACTION_DEAL;           // immediate order execution
@@ -63,17 +64,29 @@ int tdi_OpenStop()
 //# Modify Stoploss of an existing Trade                                         #
 //#                                                                              #
 //################################################################################
-int tdi_ModifySL()
+int tdi_ModifyTPSL(MqlTradeRequest &request, MqlTradeResult &result)
 {
-   return 0;
+   request.action   = TRADE_ACTION_SLTP;                                        // Change stoploss
+   request.sl       = NormalizeDouble(orderprice, _Digits);                     // new Stop Loss value: initial buy price
+   request.tp       = ordertakeprofit;                                          // new Take Profit value: old value
+               
+   Print("Minimum SL Distance archieved. Trying to break even Stoploss:");
+   Print("Position: ", positionticket, " Symbol: ", request.symbol, " Type: BUY");
+               
+   // send order
+   int retvalue = OrderSend(request,result);
+   
+   // get the result code
+   if((result.retcode == TRADE_RETCODE_DONE) 
+   || result.retcode == TRADE_RETCODE_PLACED){   //Request is completed or order placed
+      pstatus = PTRAILING;
+      Print("Position is now safe! Switching to trailing mode!");
+   }
+   else {
+      Alert("The modify TP SL request could not be completed -error:",GetLastError());
+      ResetLastError();           
+      pstatus = PHALT;
+   }
+   return (int) result.retcode;
 }
 
-
-//################################################################################
-//# Close an opened position                                                     #
-//#                                                                              #
-//################################################################################
-int tdi_ClosePosition()
-{
-   return 0;
-}
