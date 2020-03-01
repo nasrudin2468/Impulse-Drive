@@ -80,4 +80,13 @@ Achtung:	Swap bei langer Haltedauer beachten!
 Eigene Idee:	Nach Teilausstieg SL auf Break-Even. Einwand Peter Seidel: Gute sichere Variante, aber verschenkt u.U viel Potenzial, insbesondere wenn Stopploss nach EMA gesetzt.
 
 Grundphilosophie (unabhängig hiervon): Stoploss soweit wegsetzen, dass Risiko, unnötig ausgestoppt zu werden soweit sinkt damit ich die Chance habe im Plus zu landen! Ein Manueller Ausstieg ist jederzeit von Hand möglich
+
+// Neue Strategie
+// --------------
+Entry nach definierten Bedingungen mit Stoploss
+Setzen eines StopEntries in entgegengesetzten Richtung bei 10% der Stoplossdistanz
+Bei Auslösen: Auflösung Countertrade bei Rückkehr. Auslösung nach Möglichkeit mit Rückholung der Spreadkosten
+Trailing: Stopentry statt Stoploss nachziehen.
+
+
 */
