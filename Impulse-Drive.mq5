@@ -1,10 +1,27 @@
-//+------------------------------------------------------------------+
-//|                                                Impulse-Drive.mq5 |
-//|                                     Copyright 2019, nasrudin2458 |
-//|                                             https://www.mql5.com |
-//+------------------------------------------------------------------+
+﻿//################################################################################
+//#                                                                              #
+//#   Impulse-Drive.mq5                                                          #
+//#   Copyright 2020, nasrudin2458                                               #
+//#                                                                              #
+//#                                                                              #
+//################################################################################
+//#                                                                              #
+//#   Impulse-Drive.mq5                                                          #
+//#   This is the main project sourcefile.                    		               #
+//#                                                                              #
+//#                                                                              #
+//################################################################################
 
-// input parameters
+
+//################################################################################
+// hardcoded properties
+#property copyright "Copyright © 2029, nasrudin2468"
+#property link      "https://github.com/nasrudin2468/Impulse-Drive"
+#property version   "0.01"
+
+
+//################################################################################
+// Input Parameters
 input int      EmaFastPeriod        = 34;    // value count of fast exponential average, used for cross over signal
 input int      EmaSlowPeriod        = 89;    // value count of slow exponential average, used for cross over signal
 input int      StopLoss             = 30;    // absolut stop loss difference (pip value, might be scaled dependent on post comma letter count) 
@@ -20,13 +37,15 @@ input double   Lot                  = 0.1;   // static lotsize to Trade
 input int      deviation            = 100;   // maximum allowed price difference of actual price over requested price for placing an order
 input int      MagicNumber          = 2468;  // additional identification number added to each order opened by the expert advisor
 
+//################################################################################
 // global defines (replace magic numbers)
-#define PCLOSED   0                          // no position open 
-#define POPEN     10                         // position opened
-#define PTRAILING 20                         // position is in trailing stop modus
-#define PUNKNOWN  90                         // unknown status, possible malfunction
-#define PHALT     100                        // Force-stop EA state machine from further changes - debugging only
+#define PCLOSED      0                       // no position open 
+#define POPEN        10                      // position opened
+#define PTRAILING    20                      // position is in trailing stop modus
+#define PUNKNOWN     90                      // unknown status, possible malfunction
+#define PHALT        100                     // Force-stop EA state machine from further changes - debugging only
 
+//################################################################################
 // global declarations
 int      emafastHandle;                      // handle id of the EmaFast indicator
 int      emaslowHandle;                      // handle id of the EmaSlow indicotor
@@ -45,13 +64,38 @@ int      pstatus           = PUNKNOWN;       // indicates status of trades
                                              //    10: position opened
                                              //    20: position is in trailing stop modus
                                              //    90: unknown status, possible malfunction
+                                             
+//################################################################################
+// debug parameters
 bool debughalt = false;   
-                                          
 
-//+------------------------------------------------------------------+
-//| Expert initialization function                                   |
-//|   called after activating an expert advisor by dragging on chart |
-//+------------------------------------------------------------------+
+//################################################################################
+//# Includes                                                                     #
+//################################################################################
+#include "tdinterface.mqh"
+#include "unusedfunctions.mqh"
+
+
+//################################################################################
+//# int initTradeRequest(MqlTradeRequest &request)                               #
+//#   satinizes given struct and prepares it with  standard values               #
+//################################################################################
+int initTradeRequest(MqlTradeRequest &request)
+{
+   ZeroMemory(request);
+   request.symbol       = _Symbol;                                      // currency pair
+   request.volume       = Lot;                                          // number of lots to trade
+   request.magic        = MagicNumber;                                  // Order Magic Number
+   request.type_filling = ORDER_FILLING_FOK;                            // Order execution type
+   request.deviation    = deviation;                                    // Deviation from current price
+   return 0;
+}
+
+
+//################################################################################
+//# Expert initialization function                                               #
+//#   called after activating an expert advisor by dragging on chart |           #
+//################################################################################
 int OnInit()
 {
    // Create Time with an invervall of 60 seconds
@@ -78,10 +122,10 @@ int OnInit()
    return(INIT_SUCCEEDED);
 }
   
-//+------------------------------------------------------------------+
-//| Expert deinitialization function                                 |
-//|   called after deleting an expert advisor from chart             |
-//+------------------------------------------------------------------+
+//################################################################################
+//# Expert deinitialization function                                             #
+//#   called after deleting an expert advisor from chart                         #
+//################################################################################
 void OnDeinit(const int reason)
 {
    //Release indicator handles
@@ -92,10 +136,10 @@ void OnDeinit(const int reason)
 }
 
 
-//+------------------------------------------------------------------+
-//| TradeTransaction function                                        |
-//|   Callback function OrderSendAsync                               |
-//+------------------------------------------------------------------+
+//################################################################################
+//# TradeTransaction function                                                    #
+//#   Callback function OrderSendAsync                                           #
+//################################################################################
 void OnTradeTransaction(const MqlTradeTransaction& trans,
                         const MqlTradeRequest& request,
                         const MqlTradeResult& result)
@@ -103,10 +147,11 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
    //Alert("DEBUG: OnTradeTransaction() was called");
 }
 
-//+------------------------------------------------------------------+
-//| Expert tick function                                             |
-//|   called every time a new price is released on main asset        |
-//+------------------------------------------------------------------+
+
+//################################################################################
+//# Expert tick function                                                         #
+//#   called every time a new price is released on main asset                    #
+//################################################################################
 void OnTick()
 {
    if (debughalt == true){ return;}
@@ -117,9 +162,9 @@ void OnTick()
 
    // copying the last bar time to the element New_Time[0]
    int copied = CopyTime(_Symbol, _Period, 0, 1, New_Time);
-   if(copied > 0) {                    // ok, the data has been copied successfully
-      if(Old_Time != New_Time[0]) {    // if old time isn't equal to new bar time
-         IsNewBar = true;              // if it isn't a first call, the new bar has appeared
+   if(copied > 0) {                       // ok, the data has been copied successfully
+      if(Old_Time != New_Time[0]) {       // if old time isn't equal to new bar time
+         IsNewBar = true;                 // if it isn't a first call, the new bar has appeared
          
          if(MQL5InfoInteger(MQL5_DEBUGGING)) {
             //Print("We have new bar here ", New_Time[0]," old time was ", Old_Time);
@@ -194,16 +239,16 @@ void OnTick()
    }
    
    // check for open positions
-   bool Buy_opened   = false;    // variable to hold the result of Buy opened position
-   bool Sell_opened  = false;    // variable to hold the result of Sell opened position
+   bool Buy_opened   = false;             // variable to hold the result of Buy opened position
+   bool Sell_opened  = false;             // variable to hold the result of Sell opened position
 
-   if(PositionSelect(_Symbol) == true){ // we have an opened position
+   if(PositionSelect(_Symbol) == true){   // we have an opened position
    // TODO: Add search for magic number to prevent false detection of manual opened positions
       if(PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY){
-         Buy_opened  = true;     //It is a Buy
+         Buy_opened  = true;              //It is a Buy
       }
       else if(PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_SELL){
-         Sell_opened = true;     // It is a Sell
+         Sell_opened = true;              // It is a Sell
       }
    } 
    else {
@@ -512,6 +557,8 @@ void OnTick()
 }
 
 
+//################################################################################
+//# EOF
 
 
 
