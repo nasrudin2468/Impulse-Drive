@@ -15,10 +15,7 @@
 
 //################################################################################
 // hardcoded properties
-#property copyright "Copyright © 2029, nasrudin2468"
-#property link      "https://github.com/nasrudin2468/Impulse-Drive"
-#property version   "0.01"
-
+// --> hidden in mql project file: right-click on "...mqproj" - properties
 
 //################################################################################
 // Input Parameters
@@ -66,10 +63,12 @@ int      pstatus           = PUNKNOWN;       // indicates status of trades
                                              //    10: position opened
                                              //    20: position is in trailing stop modus
                                              //    90: unknown status, possible malfunction
+
                                              
 //################################################################################
 // debug parameters
 bool debughalt = false;   
+
 
 //################################################################################
 //# Includes                                                                     #
@@ -123,7 +122,8 @@ int OnInit()
    }
    return(INIT_SUCCEEDED);
 }
-  
+
+
 //################################################################################
 //# Expert deinitialization function                                             #
 //#   called after deleting an expert advisor from chart                         #
