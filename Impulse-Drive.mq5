@@ -24,7 +24,10 @@ input int      EmaSlowPeriod        = 89;    // value count of slow exponential 
 input int      StopLoss             = 30;    // absolut stop loss difference (pip value, might be scaled dependent on post comma letter count) 
 input int      TakeProfit           = 100;   // absolut take profit difference (pip value, might be scaled dependent on post comma letter count)
 input double   TrailingSLfactor     = 0.5;   // relative factor of Buyprice - SL price over trigger price - buyprice for switching into 
-                                             // trailing SL mode 
+                                             // trailing SL mode
+input int      HetchSLEnable        = 1;     // Use a hetch trade with stoploss at entry to replace a stoploss to save a trade on spikes
+input double   HetchSLEntryfactor   = 0.1;   // Percentage of Stoploss distance to enter hetchtrade
+input double   HetchSLBEfactor      = 0.2;   // Percentage of Stoploss distance to set hetch stoploss break even 
 input int      ExitByTSL            = 1;     // exit strategy by trailing stop loss (0: OFF | 1: on | 2: on TICKWISE)
 input int      ExitByCrossover      = 1;     // exit strategy by ema crossover (0: OFF | 1: on | 2: on TICKWISE)
 input int      ExitBySlowEmaCross   = 1;     // exit strategy by candle crossing the slowEma (0: OFF | 1: on | 2: on TICKWISE)
@@ -37,8 +40,9 @@ input int      MagicNumber          = 2468;  // additional identification number
 //################################################################################
 // global defines (replace magic numbers)
 #define PCLOSED      0                       // no position open 
-#define POPEN        10                      // position opened
-#define PTRAILING    20                      // position is in trailing stop modus
+#define POPEN        10                      // position opened. wait for hetch / trailing condition
+#define PHETCH       20                      // Position is in hetching mode
+#define PTRAILING    30                      // position is in trailing stop modus
 #define PUNKNOWN     90                      // unknown status, possible malfunction
 #define PHALT        100                     // Force-stop EA state machine from further changes - debugging only
 
@@ -67,7 +71,9 @@ int      pstatus           = PUNKNOWN;       // indicates status of trades
                                              
 //################################################################################
 // debug parameters
-bool debughalt = false;   
+bool debughalt = false;
+bool debugpauseontrade = false;
+   
 
 
 //################################################################################
@@ -161,6 +167,7 @@ void OnTick()
    static datetime Old_Time;
    datetime New_Time[1];
    bool IsNewBar = false;
+   int retcode = 0;
 
    // copying the last bar time to the element New_Time[0]
    int copied = CopyTime(_Symbol, _Period, 0, 1, New_Time);
@@ -274,7 +281,12 @@ void OnTick()
             ZeroMemory(mresult);
             
             // open buy position
-            tdi_setPosition(mrequest, mresult);
+            retcode = tdi_setPosition(mrequest, mresult);
+            
+            if ((HetchSLEnable == 1 ) && (retcode == TRADE_RETCODE_DONE)) {
+               // Prepare Hetch data
+               // Open Hetchtrade
+            }
          }
          
          // check for sell condition: ema crossover positive to negative
@@ -289,7 +301,12 @@ void OnTick()
             ZeroMemory(mresult);
             
             // open sell  position
-            tdi_setPosition(mrequest, mresult);
+            retcode = tdi_setPosition(mrequest, mresult);
+            
+            if ((HetchSLEnable == 1 ) && (retcode == TRADE_RETCODE_DONE)) {
+               // Prepare Hetch data
+               // Open Hetchtrade
+            }
          }
          break;   
       }
@@ -301,7 +318,10 @@ void OnTick()
          double distancemin = 0;
          
          if (Buy_opened == true) {
+            // Calculate values for further strategy decitions
             distancemin = NormalizeDouble(orderprice + TrailingSLfactor * STP * _Point, _Digits);
+            
+            // Check for switch in Trailing mode
             if (price > distancemin){
                // Todo: Alter stoploss to order open price
                // Print("Todo: Alter stoploss to order open price");
@@ -318,6 +338,8 @@ void OnTick()
                // send order
                tdi_ModifyTPSL(mrequest, mresult);
             }
+            // Else if Hetch condition has happened
+            //    Goto PHetch
          }
          
          else if(Sell_opened == true){

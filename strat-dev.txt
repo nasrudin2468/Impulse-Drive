@@ -81,11 +81,20 @@ Eigene Idee:	Nach Teilausstieg SL auf Break-Even. Einwand Peter Seidel: Gute sic
 
 Grundphilosophie (unabhängig hiervon): Stoploss soweit wegsetzen, dass Risiko, unnötig ausgestoppt zu werden soweit sinkt damit ich die Chance habe im Plus zu landen! Ein Manueller Ausstieg ist jederzeit von Hand möglich
 
-// Neue Strategie
+// Neue Strategie: Hetcherweiterung
 // --------------
 Entry nach definierten Bedingungen mit Stoploss
-Setzen eines StopEntries in entgegengesetzten Richtung bei 10% der Stoplossdistanz
-Bei Auslösen: Auflösung Countertrade bei Rückkehr. Auslösung nach Möglichkeit mit Rückholung der Spreadkosten
+Setzen eines StopEntries in entgegengesetzten Richtung bei VAR1 (10%) der Stoplossdistanz mit SL auf Entry des Mastertrades
+Fallunterscheidung aufgelöster Hetch:
+a) Hetch läuft schlecht: Ausstieg bei Überschreitung Entry Mastertrade. Reduktion Master SL um  Verlust. Rückkehr zu Fallunterscheidung.
+b) Hetch läuft gut: Nachziehen HetchSL bei VAR2 (20%) der Stoplossdistanz des Mastertrades.
+Fallunterscheidung Hetchrichtung nach Nachziehen HetchSL
+a) Hetch läuft gut: Close Hetch nach SL CLose Mastertrade
+b) Hetch läuft schlecht: Close Hetch durch Breakeven.
+Bi
+
+
+ Auflösung Countertrade bei Rückkehr. Auslösung nach Möglichkeit mit Rückholung der Spreadkosten
 Trailing: Stopentry statt Stoploss nachziehen.
 
 
