@@ -31,7 +31,7 @@ input double   HetchSLBEfactor      = 0.2;   // Percentage of Stoploss distance 
 input int      ExitByTSL            = 1;     // exit strategy by trailing stop loss (0: OFF | 1: on | 2: on TICKWISE)
 input int      ExitByCrossover      = 1;     // exit strategy by ema crossover (0: OFF | 1: on | 2: on TICKWISE)
 input int      ExitBySlowEmaCross   = 1;     // exit strategy by candle crossing the slowEma (0: OFF | 1: on | 2: on TICKWISE)
-input int      ExitByFastEmaCross   = 0;     // exit strategy by canlde crossing the slowEma (0: OFF | 1: on | 2: on TICKWISE)
+input int      ExitByFastEmaCross   = 0;     // exit strategy by candle crossing the fastEma (0: OFF | 1: on | 2: on TICKWISE)
 input double   TSLRelativeGain      = 0.5;   // Trailing stop relative profit value based on highest profit since order start
 input double   Lot                  = 0.1;   // static lotsize to Trade
 input int      deviation            = 100;   // maximum allowed price difference of actual price over requested price for placing an order
@@ -231,13 +231,13 @@ void OnTick()
    }
    // Copy new EMA-slow values into buffer 
    if(CopyBuffer(emaslowHandle, 0, 0, 3, emaslowVal) < 0){
-      Alert("Error copying EMA losw indicator buffer - error:",GetLastError());
+      Alert("Error copying EMA slow indicator buffer - error:",GetLastError());
       ResetLastError();
       return;
    }
    
    // Debug MSG showing latest values
-   //Alert("Closed price: ", mrate[0].close, " ema34: ", emafastVal[0], " ema89: ", emaslowVal[0]);
+   // Alert("Closed price: ", mrate[0].close, " ema34: ", emafastVal[0], " ema89: ", emaslowVal[0]);
    
    // Per Bar calculations for trading strategy
    emadifference[1] = emadifference[0];
