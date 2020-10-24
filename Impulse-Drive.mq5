@@ -419,32 +419,31 @@ void OnTick()
             }
          }
  
-         if(ExitBySlowEmaCross>0){
+         else if(ExitBySlowEmaCross > 0){
             if((ExitBySlowEmaCross == 2) || (IsNewBar == true)){
                if((( Buy_opened == true) && (price < emaslowVal[0]))
-                  || (( Sell_opened == true) && (price > emaslowVal[0]))){
+               || (( Sell_opened == true) && (price > emaslowVal[0]))){
                      doexit = true;
-                     Print("Exit by SlowEmaCross condition triggeded!");
-                  }
+                     Print("Exit by SlowEmaCross condition triggered!");
                }
-            } 
-         if(ExitByFastEmaCross>0) {
+            }
+         } 
+         else if(ExitByFastEmaCross > 0) {
             if((ExitByFastEmaCross == 2) || (IsNewBar == true)){
                if((( Buy_opened == true) && (price < emafastVal[0]))
                || (( Sell_opened == true) && (price> emafastVal[0]))){
                   doexit = true;
-                  Print("Exit by FastEmaCross condition triggeded!");
-                  }
+                  Print("Exit by FastEmaCross condition triggered!");
                }
             }
-
-         if(ExitByCrossover>0){
+         }
+         else if(ExitByCrossover > 0){
             if((ExitByCrossover == 2) || (IsNewBar == true)){
                // TODO: Implement Exit strategy by crossover
                if(((emadifference[0] > 0) && (emadifference[1] <= 0))
                || ((emadifference[0] < 0) && (emadifference[1] >= 0))){
                   doexit = true;
-                  Print("Exit by EMA Crossover condition triggeded!");
+                  Print("Exit by EMA Crossover condition triggerred!");
                }
             }
          }
