@@ -277,7 +277,10 @@ void OnTick()
             initTradeRequest(mrequest);
             mrequest.price    = NormalizeDouble(latest_price.ask,_Digits);                // latest ask price
             mrequest.sl       = NormalizeDouble(latest_price.ask - STP*_Point,_Digits);   // Stop Loss
-            mrequest.tp       = NormalizeDouble(latest_price.ask + TKP*_Point,_Digits);   // Take Profit
+            mrequest.type     = ORDER_TYPE_BUY;
+            if (TKP != 0) {
+               mrequest.tp       = NormalizeDouble(latest_price.ask + TKP*_Point,_Digits);   // Take Profit
+            }
             ZeroMemory(mresult);
             
             // open buy position
@@ -297,7 +300,10 @@ void OnTick()
             initTradeRequest(mrequest);
             mrequest.price    = NormalizeDouble(latest_price.bid,_Digits);                // latest Bid price
             mrequest.sl       = NormalizeDouble(latest_price.bid + STP*_Point,_Digits);   // Stop Loss
-            mrequest.tp       = NormalizeDouble(latest_price.bid - TKP*_Point,_Digits);   // Take Profit 
+            mrequest.type     = ORDER_TYPE_SELL;
+            if (TKP != 0) {
+               mrequest.tp       = NormalizeDouble(latest_price.bid - TKP*_Point,_Digits);   // Take Profit 
+            }
             ZeroMemory(mresult);
             
             // open sell  position
