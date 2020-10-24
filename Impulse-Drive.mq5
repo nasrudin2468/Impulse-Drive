@@ -270,7 +270,7 @@ void OnTick()
       case PCLOSED:{    
          // TODO: Modify static SL TP Definitions to match real strategy definition
          // TODO: SL on EMA89 like original Seidel strategy
-         if((emadifference[0] > 0) && (emadifference[1] < 0)){
+         if((emadifference[0] > 0) && (emadifference[1] <= 0)){
             Print("Buy condition detected! Open Buy Request...");
 
             // Prepare Data for Buy Position
@@ -293,7 +293,7 @@ void OnTick()
          }
          
          // check for sell condition: ema crossover positive to negative
-         else if((emadifference[0] < 0) && (emadifference[1] > 0)) {
+         else if((emadifference[0] < 0) && (emadifference[1] >= 0)) {
             Print("Sell condition detected! Open Sell Request...");
             
             // Prepare Data for Sell Position
@@ -441,8 +441,8 @@ void OnTick()
          if(ExitByCrossover>0){
             if((ExitByCrossover == 2) || (IsNewBar == true)){
                // TODO: Implement Exit strategy by crossover
-               if(((emadifference[0] > 0) && (emadifference[1] < 0))
-               || ((emadifference[0] < 0) && (emadifference[1] > 0))){
+               if(((emadifference[0] > 0) && (emadifference[1] <= 0))
+               || ((emadifference[0] < 0) && (emadifference[1] >= 0))){
                   doexit = true;
                   Print("Exit by EMA Crossover condition triggeded!");
                }
