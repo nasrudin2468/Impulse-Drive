@@ -419,7 +419,7 @@ void OnTick()
             }
          }
  
-         else if(ExitBySlowEmaCross > 0){
+         if(ExitBySlowEmaCross > 0){
             if((ExitBySlowEmaCross == 2) || (IsNewBar == true)){
                if((( Buy_opened == true) && (price < emaslowVal[0]))
                || (( Sell_opened == true) && (price > emaslowVal[0]))){
@@ -428,7 +428,7 @@ void OnTick()
                }
             }
          } 
-         else if(ExitByFastEmaCross > 0) {
+         if(ExitByFastEmaCross > 0) {
             if((ExitByFastEmaCross == 2) || (IsNewBar == true)){
                if((( Buy_opened == true) && (price < emafastVal[0]))
                || (( Sell_opened == true) && (price> emafastVal[0]))){
@@ -437,7 +437,7 @@ void OnTick()
                }
             }
          }
-         else if(ExitByCrossover > 0){
+         if(ExitByCrossover > 0){
             if((ExitByCrossover == 2) || (IsNewBar == true)){
                // TODO: Implement Exit strategy by crossover
                if(((emadifference[0] > 0) && (emadifference[1] <= 0))
